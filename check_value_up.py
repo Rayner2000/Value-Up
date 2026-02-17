@@ -346,18 +346,22 @@ def run():
 
         log.info(f"Checking {company!r} (corp_code={corp_code}) …")
         filings = search_filings(corp_code, bgn_de, end_de)
+        log.info(f"  → {len(filings)} filing(s) returned from DART")
 
         for filing in filings:
             rcept_no = filing.get("rcept_no", "")
+            title    = filing.get("report_nm", "")
+            date     = filing.get("rcept_dt", "")
+            log.info(f"  [{date}] {title!r}")
             if rcept_no in seen:
+                log.info(f"    (already seen — skipping)")
                 continue
 
             if is_value_up_filing(filing):
-                log.info(f"  ✅ NEW value-up filing: {filing.get('report_nm')} ({filing.get('rcept_dt')})")
+                log.info(f"  ✅ NEW value-up filing: {title} ({date})")
                 new_filings.append(filing)
                 seen.add(rcept_no)
             else:
-                # Mark as seen so we don't re-check non-value-up filings
                 seen.add(rcept_no)
 
     save_seen(seen)
