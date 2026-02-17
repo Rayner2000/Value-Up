@@ -274,6 +274,42 @@ def send_slack(new_filings: list[dict]):
         log.error(f"Failed to send Slack message: {e}")
 
 
+
+def send_success_notification(companies: list[str]):
+    """Send a brief email confirming the script ran successfully."""
+    if not (EMAIL_SENDER and EMAIL_PASSWORD and EMAIL_TO):
+        return
+
+    recipients = [r.strip() for r in EMAIL_TO.split(",")]
+    subject = f"[DART Value-Up] ✅ Weekly check complete — no new filings"
+
+    html = f"""
+    <html><body>
+    <h3>✅ DART Value-Up Check Complete</h3>
+    <p>The weekly check ran successfully on <strong>{datetime.now().strftime("%Y-%m-%d %H:%M KST")}</strong>.</p>
+    <p><strong>Result:</strong> No new 기업가치제고계획 filings found in the past 90 days.</p>
+    <p><strong>Companies monitored:</strong> {len(companies)}</p>
+    <p style="color:gray;font-size:12px;">
+        This is an automated success notification. You'll receive a different alert when a value-up plan is actually found.
+    </p>
+    </body></html>
+    """
+
+    msg = MIMEMultipart("alternative")
+    msg["Subject"] = subject
+    msg["From"]    = EMAIL_SENDER
+    msg["To"]      = ", ".join(recipients)
+    msg.attach(MIMEText(html, "html"))
+
+    try:
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+            server.login(EMAIL_SENDER, EMAIL_PASSWORD)
+            server.sendmail(EMAIL_SENDER, recipients, msg.as_string())
+        log.info(f"Success notification email sent to {recipients}")
+    except Exception as e:
+        log.error(f"Failed to send success notification email: {e}")
+
+
 def save_to_csv(new_filings: list[dict]):
     rows = []
     for f in new_filings:
@@ -373,6 +409,7 @@ def run():
         send_slack(new_filings)
     else:
         log.info("No new value-up plan filings found this week.")
+        send_success_notification(companies)
 
     log.info("Done.\n")
 
