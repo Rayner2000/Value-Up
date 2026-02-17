@@ -54,11 +54,3 @@ jobs:
           EMAIL_TO:          ${{ secrets.EMAIL_TO }}
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         run: python check_value_up.py
-
-      # ── Commit updated CSV back to the repo ──
-      - name: Commit updated filings CSV
-        uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: "chore: update value_up_filings.csv [skip ci]"
-          file_pattern: "value_up_filings.csv seen_filings.json"
-          skip_dirty_check: false
