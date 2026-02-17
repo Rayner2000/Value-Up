@@ -325,9 +325,9 @@ def run():
 
     seen = load_seen()
 
-    # Search the past 8 days (a little overlap to avoid missing anything)
+    # Search the past 90 days (a little overlap to avoid missing anything)
     end_de   = datetime.now().strftime("%Y%m%d")
-    bgn_de   = (datetime.now() - timedelta(days=8)).strftime("%Y%m%d")
+    bgn_de   = (datetime.now() - timedelta(days=90)).strftime("%Y%m%d")
 
     new_filings = []
 
