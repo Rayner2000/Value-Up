@@ -1,0 +1,26 @@
+# ──────────────────────────────────────────────────────────────
+# Companies to monitor for Value-Up Plan (기업가치제고계획) filings
+# ──────────────────────────────────────────────────────────────
+# Add one company per line using EITHER:
+#   - Korean company name  (e.g.  삼성전자)
+#   - 6-digit stock code   (e.g.  005930)
+#
+# Lines starting with # are comments and are ignored.
+# ──────────────────────────────────────────────────────────────
+
+# ── KOSPI Blue-chips ──
+
+
+# ── KOSDAQ Examples ──
+
+
+# ── By stock code (alternative to name) ──
+104480
+040610
+094840
+021820
+383800
+027410
+066620
+000850
+010960
