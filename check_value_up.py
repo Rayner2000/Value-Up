@@ -127,31 +127,38 @@ def _search_corp_map(corp_map: dict, query: str) -> str | None:
 
 
 def search_filings(corp_code: str, bgn_de: str, end_de: str) -> list[dict]:
-    """Search all DART filings for a company between two dates."""
+    """Search all DART filings for a company between two dates.
+    Searches both regular (A) and voluntary (B) disclosure types to catch
+    value-up plans filed as 자율공시.
+    """
     url = f"{DART_BASE}/list.json"
-    params = {
-        "crtfc_key": DART_API_KEY,
-        "corp_code":  corp_code,
-        "bgn_de":     bgn_de,
-        "end_de":     end_de,
-        "page_count": 100,
-        "sort":       "date",
-        "sort_mth":   "desc",
-    }
-    try:
-        resp = requests.get(url, params=params, timeout=15)
-        resp.raise_for_status()
-        data = resp.json()
-        if data.get("status") == "000":
-            return data.get("list", [])
-        elif data.get("status") == "013":
-            return []   # No results — normal
-        else:
-            log.warning(f"DART API returned status {data.get('status')}: {data.get('message')}")
-            return []
-    except Exception as e:
-        log.error(f"Error searching filings for {corp_code}: {e}")
-        return []
+    all_filings = []
+
+    for pblntf_ty in ["A", "B"]:   # A = 정기공시, B = 자율공시
+        params = {
+            "crtfc_key":  DART_API_KEY,
+            "corp_code":  corp_code,
+            "bgn_de":     bgn_de,
+            "end_de":     end_de,
+            "pblntf_ty":  pblntf_ty,
+            "page_count": 100,
+            "sort":       "date",
+            "sort_mth":   "desc",
+        }
+        try:
+            resp = requests.get(url, params=params, timeout=15)
+            resp.raise_for_status()
+            data = resp.json()
+            if data.get("status") == "000":
+                all_filings.extend(data.get("list", []))
+            elif data.get("status") == "013":
+                pass   # No results — normal
+            else:
+                log.warning(f"DART API returned status {data.get('status')}: {data.get('message')}")
+        except Exception as e:
+            log.error(f"Error searching filings for {corp_code} (type {pblntf_ty}): {e}")
+
+    return all_filings
 
 
 def is_value_up_filing(filing: dict) -> bool:
@@ -325,7 +332,7 @@ def run():
 
     seen = load_seen()
 
-    # Search the past 90 days (a little overlap to avoid missing anything)
+    # Search the past 90 days (3 months)
     end_de   = datetime.now().strftime("%Y%m%d")
     bgn_de   = (datetime.now() - timedelta(days=90)).strftime("%Y%m%d")
 
