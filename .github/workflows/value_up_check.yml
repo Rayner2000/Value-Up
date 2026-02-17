@@ -1,21 +1,8 @@
-# .github/workflows/value_up_check.yml
-#
-# Runs the DART Value-Up checker every Monday at 09:00 KST (00:00 UTC)
-# and also lets you trigger it manually from GitHub Actions UI.
-#
-# Setup:
-#   1. Push this repo to GitHub
-#   2. Go to Settings → Secrets and variables → Actions
-#   3. Add the secrets listed below
-
 name: DART Value-Up Weekly Check
 
 on:
   schedule:
-    # Every Monday at 00:00 UTC = 09:00 KST
     - cron: "0 0 * * 1"
-
-  # Also allow a manual trigger from the GitHub Actions UI
   workflow_dispatch:
 
 jobs:
@@ -26,17 +13,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      # ── Restore the "seen filings" cache between runs ──
-      - name: Restore seen filings cache
-        uses: actions/cache@v4
-        with:
-          path: |
-            seen_filings.json
-            corp_codes.json
-          key: dart-state-${{ runner.os }}-${{ github.run_id }}
-          restore-keys: |
-            dart-state-${{ runner.os }}-
 
       - name: Set up Python
         uses: actions/setup-python@v5
